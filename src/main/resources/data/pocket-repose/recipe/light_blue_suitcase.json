@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "minecraft:light_blue_dye",
+    "#pocket-repose:suitcases"
+  ],
+  "result": {
+    "count": 1,
+    "id": "pocket-repose:light_blue_suitcase"
+  }
+}

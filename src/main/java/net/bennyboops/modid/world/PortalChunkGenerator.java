@@ -1,44 +1,44 @@
 package net.bennyboops.modid.world;
 
 import net.bennyboops.modid.block.ModBlocks;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.StructureWorldAccess;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.gen.StructureAccessor;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.bennyboops.modid.util.VoidChunkGenerator;
+import xyz.nucleoid.fantasy.util.VoidChunkGenerator;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.StructureManager;
+import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkAccess;
 
 public class PortalChunkGenerator extends VoidChunkGenerator {
-    private final BlockState portalState = ModBlocks.PORTAL.getDefaultState();
+    private final BlockState portalState = ModBlocks.PORTAL.defaultBlockState();
 
     public PortalChunkGenerator(Registry<Biome> biomeRegistry) {
         super(biomeRegistry,
-                RegistryKey.of(RegistryKeys.BIOME, new Identifier("pocket-repose", "pocket_islands")));
+                ResourceKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath("pocket-repose", "pocket_islands")));
     }
 
     @Override
-    public void generateFeatures(
-            StructureWorldAccess world,
-            Chunk chunk,
-            StructureAccessor structureAccessor
+    public void applyBiomeDecoration(
+            WorldGenLevel world,
+            ChunkAccess chunk,
+            StructureManager structureAccessor
     ) {
-        super.generateFeatures(world, chunk, structureAccessor);
+        super.applyBiomeDecoration(world, chunk, structureAccessor);
 
         ChunkPos chunkPos = chunk.getPos();
         for (int dy = -64; dy <= -61; dy++) {
             for (int dx = 0; dx < 16; dx++) {
                 for (int dz = 0; dz < 16; dz++) {
-                    int worldX = (chunkPos.x << 4) + dx;
-                    int worldZ = (chunkPos.z << 4) + dz;
+                    int worldX = (chunkPos.x() << 4) + dx;
+                    int worldZ = (chunkPos.z() << 4) + dz;
                     BlockPos blockPos = new BlockPos(worldX, dy, worldZ);
-                    world.setBlockState(blockPos, portalState, Block.NOTIFY_LISTENERS);
+                    world.setBlock(blockPos, portalState, Block.UPDATE_CLIENTS);
                 }
             }
         }

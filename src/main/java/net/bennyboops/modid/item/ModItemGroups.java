@@ -2,45 +2,45 @@ package net.bennyboops.modid.item;
 
 import net.bennyboops.modid.PocketRepose;
 import net.bennyboops.modid.block.ModBlocks;
-import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
-import net.minecraft.block.Blocks;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.fabricmc.fabric.api.creativetab.v1.FabricCreativeModeTab;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Blocks;
 
 public class ModItemGroups {
-    public static final ItemGroup POCKET_GROUP = Registry.register(Registries.ITEM_GROUP,
-            new Identifier(PocketRepose.MOD_ID, "pocket"),
-            FabricItemGroup.builder().displayName(Text.translatable("itemgroup.pocket"))
-                    .icon(() -> new ItemStack(ModItems.KEYSTONE)).entries((displayContext, entries) -> {
+    public static final CreativeModeTab POCKET_GROUP = Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB,
+            Identifier.fromNamespaceAndPath(PocketRepose.MOD_ID, "pocket"),
+            FabricCreativeModeTab.builder().title(Component.translatable("itemgroup.pocket"))
+                    .icon(() -> new ItemStack(ModItems.KEYSTONE)).displayItems((displayContext, entries) -> {
 
-                        entries.add(ModItems.KEYSTONE);
+                        entries.accept(ModItems.KEYSTONE);
 
-                        entries.add(ModBlocks.SUITCASE);
-                        entries.add(ModBlocks.WHITE_SUITCASE);
-                        entries.add(ModBlocks.LIGHT_GRAY_SUITCASE);
-                        entries.add(ModBlocks.GRAY_SUITCASE);
-                        entries.add(ModBlocks.BLACK_SUITCASE);
-                        entries.add(ModBlocks.RED_SUITCASE);
-                        entries.add(ModBlocks.ORANGE_SUITCASE);
-                        entries.add(ModBlocks.YELLOW_SUITCASE);
-                        entries.add(ModBlocks.LIME_SUITCASE);
-                        entries.add(ModBlocks.GREEN_SUITCASE);
-                        entries.add(ModBlocks.CYAN_SUITCASE);
-                        entries.add(ModBlocks.LIGHT_BLUE_SUITCASE);
-                        entries.add(ModBlocks.BLUE_SUITCASE);
-                        entries.add(ModBlocks.MAGENTA_SUITCASE);
-                        entries.add(ModBlocks.PURPLE_SUITCASE);
-                        entries.add(ModBlocks.PINK_SUITCASE);
+                        entries.accept(ModBlocks.SUITCASE);
+                        entries.accept(ModBlocks.WHITE_SUITCASE);
+                        entries.accept(ModBlocks.LIGHT_GRAY_SUITCASE);
+                        entries.accept(ModBlocks.GRAY_SUITCASE);
+                        entries.accept(ModBlocks.BLACK_SUITCASE);
+                        entries.accept(ModBlocks.RED_SUITCASE);
+                        entries.accept(ModBlocks.ORANGE_SUITCASE);
+                        entries.accept(ModBlocks.YELLOW_SUITCASE);
+                        entries.accept(ModBlocks.LIME_SUITCASE);
+                        entries.accept(ModBlocks.GREEN_SUITCASE);
+                        entries.accept(ModBlocks.CYAN_SUITCASE);
+                        entries.accept(ModBlocks.LIGHT_BLUE_SUITCASE);
+                        entries.accept(ModBlocks.BLUE_SUITCASE);
+                        entries.accept(ModBlocks.MAGENTA_SUITCASE);
+                        entries.accept(ModBlocks.PURPLE_SUITCASE);
+                        entries.accept(ModBlocks.PINK_SUITCASE);
 
-                        entries.add(ModBlocks.SECRET_BARREL);
+                        entries.accept(ModBlocks.SECRET_BARREL);
 
-                        entries.add(ModBlocks.PORTAL);
+                        entries.accept(ModBlocks.PORTAL);
 
-                        entries.add(Blocks.ANVIL);
+                        entries.accept(Blocks.ANVIL);
 
                     }).build());
     public static void registerItemGroups() {

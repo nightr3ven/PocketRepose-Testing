@@ -1,17 +1,22 @@
 package net.bennyboops.modid.item;
 
 import net.bennyboops.modid.PocketRepose;
-import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
-import net.minecraft.item.Item;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.Item;
+
+import java.util.function.Function;
 
 public class ModItems {
-    public static final Item KEYSTONE = registerItem("keystone", new KeystoneItem(new FabricItemSettings()));
+    public static final Item KEYSTONE = registerItem("keystone", KeystoneItem::new);
 
-    private static Item registerItem(String name, Item item) {
-        return Registry.register(Registries.ITEM, new Identifier(PocketRepose.MOD_ID, name), item);
+    private static Item registerItem(String name, Function<Item.Properties, Item> factory) {
+        Identifier id = Identifier.fromNamespaceAndPath(PocketRepose.MOD_ID, name);
+        ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, id);
+        return Registry.register(BuiltInRegistries.ITEM, key, factory.apply(new Item.Properties().setId(key)));
     }
 
     public static void registerModItems() {

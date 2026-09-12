@@ -1,37 +1,47 @@
 package net.bennyboops.modid.data;
 
+import com.mojang.serialization.Codec;
 import net.bennyboops.modid.block.entity.SuitcaseBlockEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.world.PersistentStateManager;
-import net.minecraft.world.World;
-import net.minecraft.world.PersistentState;
-import net.minecraft.util.math.BlockPos;
-
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraft.world.level.saveddata.SavedDataType;
+import net.minecraft.world.level.storage.SavedDataStorage;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SuitcaseRegistrySavedData extends PersistentState {
+public class SuitcaseRegistrySavedData extends SavedData {
     public static final String DATA_NAME = "pocket-repose:suitcase_registry";
+    private static final Codec<SuitcaseRegistrySavedData> CODEC = CompoundTag.CODEC.xmap(
+            SuitcaseRegistrySavedData::readNbt,
+            data -> data.save(new CompoundTag())
+    );
+    private static final SavedDataType<SuitcaseRegistrySavedData> TYPE = new SavedDataType<>(
+            Identifier.parse(DATA_NAME),
+            SuitcaseRegistrySavedData::new,
+            CODEC,
+            null
+    );
     private final Map<String, Map<String, BlockPos>> registry = new HashMap<>();
 
     public SuitcaseRegistrySavedData() {
         super();
     }
 
-    @Override
-    public NbtCompound writeNbt(NbtCompound nbt) {
-        NbtCompound top = new NbtCompound();
+    public CompoundTag save(CompoundTag nbt) {
+        CompoundTag top = new CompoundTag();
         for (Map.Entry<String, Map<String, BlockPos>> entry : registry.entrySet()) {
             String keystone = entry.getKey();
             Map<String, BlockPos> playerMap = entry.getValue();
 
-            NbtList playerList = new NbtList();
+            ListTag playerList = new ListTag();
             for (Map.Entry<String, BlockPos> e2 : playerMap.entrySet()) {
-                NbtCompound record = new NbtCompound();
+                CompoundTag record = new CompoundTag();
                 record.putString("UUID", e2.getKey());
                 BlockPos pos = e2.getValue();
                 record.putInt("X", pos.getX());
@@ -45,23 +55,23 @@ public class SuitcaseRegistrySavedData extends PersistentState {
         return nbt;
     }
 
-    public static SuitcaseRegistrySavedData readNbt(NbtCompound nbt) {
+    public static SuitcaseRegistrySavedData readNbt(CompoundTag nbt) {
         SuitcaseRegistrySavedData data = new SuitcaseRegistrySavedData();
-        if (nbt.contains("RegistryEntries", NbtElement.COMPOUND_TYPE)) {
-            NbtCompound top = nbt.getCompound("RegistryEntries");
-            for (String keystone : top.getKeys()) {
-                NbtList playerList = top.getList(keystone, NbtElement.COMPOUND_TYPE);
-                Map<String, BlockPos> playerMap = new HashMap<>();
-                for (int i = 0; i < playerList.size(); i++) {
-                    NbtCompound rec = playerList.getCompound(i);
-                    String uuid = rec.getString("UUID");
-                    int x = rec.getInt("X");
-                    int y = rec.getInt("Y");
-                    int z = rec.getInt("Z");
+        CompoundTag top = nbt.getCompoundOrEmpty("RegistryEntries");
+        for (String keystone : top.keySet()) {
+            ListTag playerList = top.getListOrEmpty(keystone);
+            Map<String, BlockPos> playerMap = new HashMap<>();
+            for (int i = 0; i < playerList.size(); i++) {
+                CompoundTag rec = playerList.getCompoundOrEmpty(i);
+                String uuid = rec.getString("UUID").orElse("");
+                int x = rec.getInt("X").orElse(0);
+                int y = rec.getInt("Y").orElse(0);
+                int z = rec.getInt("Z").orElse(0);
+                if (!uuid.isEmpty()) {
                     playerMap.put(uuid, new BlockPos(x, y, z));
                 }
-                data.registry.put(keystone, playerMap);
             }
+            data.registry.put(keystone, playerMap);
         }
         return data;
     }
@@ -69,7 +79,7 @@ public class SuitcaseRegistrySavedData extends PersistentState {
     public void syncFromStaticRegistry() {
         registry.clear();
         SuitcaseBlockEntity.saveSuitcaseRegistryTo(registry);
-        markDirty();
+        setDirty();
     }
 
     public void syncToStaticRegistry() {
@@ -77,28 +87,20 @@ public class SuitcaseRegistrySavedData extends PersistentState {
     }
 
     public static void onServerStart(MinecraftServer server) {
-        ServerWorld overworld = server.getWorld(World.OVERWORLD);
+        ServerLevel overworld = server.getLevel(Level.OVERWORLD);
         if (overworld == null) return;
 
-        PersistentStateManager mgr = overworld.getPersistentStateManager();
-        SuitcaseRegistrySavedData data = mgr.getOrCreate(
-                SuitcaseRegistrySavedData::readNbt,
-                SuitcaseRegistrySavedData::new,
-                DATA_NAME
-        );
+        SavedDataStorage mgr = overworld.getDataStorage();
+        SuitcaseRegistrySavedData data = mgr.computeIfAbsent(TYPE);
         data.syncToStaticRegistry();
     }
 
     public static void onRegistryChanged(MinecraftServer server) {
-        ServerWorld overworld = server.getWorld(World.OVERWORLD);
+        ServerLevel overworld = server.getLevel(Level.OVERWORLD);
         if (overworld == null) return;
 
-        PersistentStateManager mgr = overworld.getPersistentStateManager();
-        SuitcaseRegistrySavedData data = mgr.getOrCreate(
-                SuitcaseRegistrySavedData::readNbt,
-                SuitcaseRegistrySavedData::new,
-                DATA_NAME
-        );
+        SavedDataStorage mgr = overworld.getDataStorage();
+        SuitcaseRegistrySavedData data = mgr.computeIfAbsent(TYPE);
         data.syncFromStaticRegistry();
     }
 }

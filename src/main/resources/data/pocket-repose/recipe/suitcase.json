@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "GGG",
+    "GCG",
+    "LLL"
+  ],
+  "key": {
+    "L": "minecraft:leather",
+    "G": "minecraft:gold_ingot",
+    "C": "minecraft:ender_chest"
+  },
+  "result": {
+    "count": 1,
+    "id": "pocket-repose:suitcase"
+  }
+}

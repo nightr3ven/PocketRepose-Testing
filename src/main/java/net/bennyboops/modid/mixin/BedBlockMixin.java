@@ -1,33 +1,25 @@
 package net.bennyboops.modid.mixin;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(ServerPlayerEntity.class)
+@Mixin(ServerPlayer.class)
 public class BedBlockMixin {
 
-    @Inject(method = "setSpawnPoint", at = @At("HEAD"), cancellable = true)
-    private void preventSpawnSettingInPocketDimensions(RegistryKey<World> dimension,
-                                                       BlockPos pos, float angle, boolean forced, boolean sendMessage, CallbackInfo ci) {
-        ServerPlayerEntity player = (ServerPlayerEntity) (Object) this;
+    @Inject(method = "setRespawnPosition", at = @At("HEAD"), cancellable = true)
+    private void preventSpawnSettingInPocketDimensions(ServerPlayer.RespawnConfig respawnConfig,
+                                                       boolean showMessage, CallbackInfo ci) {
+        ResourceKey<Level> dimension = respawnConfig == null
+                ? null
+                : respawnConfig.respawnData().dimension();
         if (dimension != null &&
-                dimension.getValue().getNamespace().equals("pocket-repose") &&
-                dimension.getValue().getPath().startsWith("pocket_dimension_")) {
-            /**
-            if (sendMessage) {
-                player.sendMessage(Text.literal("Respawn point not set")
-                        .formatted(Formatting.RED), true);
-            }
-             **/
+                dimension.identifier().getNamespace().equals("pocket-repose") &&
+                dimension.identifier().getPath().startsWith("pocket_dimension_")) {
             ci.cancel();
         }
     }
